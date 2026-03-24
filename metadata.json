@@ -1,0 +1,5 @@
+{
+  "name": "Print-Perfect Invoice Generator",
+  "description": "A minimal, print-ready invoice generator that replicates a specific professional layout with live preview and A4 printing support.",
+  "requestFramePermissions": []
+}
