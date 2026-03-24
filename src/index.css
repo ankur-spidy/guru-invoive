@@ -7,44 +7,57 @@
   --font-poppins: "Poppins", sans-serif;
 }
 
+.invoice-container {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  max-height: 297mm;
+  padding: 14mm;
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
 @layer base {
   @media print {
     @page {
-      size: A4;
-      margin: 20mm;
+      size: A4 portrait;
+      margin: 0;
     }
-    
+
+    html, body {
+      width: 210mm;
+      height: 297mm;
+    }
+
     body {
       background: white !important;
       -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .no-print {
       display: none !important;
     }
 
-    .print-only {
-      display: block !important;
-    }
-
     .invoice-container {
-      width: 100% !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      min-height: unset !important;
+      max-height: unset !important;
+      padding: 14mm !important;
       margin: 0 !important;
-      padding: 0 !important;
       box-shadow: none !important;
       border: none !important;
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
+      overflow: hidden !important;
+    }
+
+    * {
+      page-break-inside: avoid;
     }
   }
 }
-
-.invoice-container {
-  background: white;
-  width: 210mm;
-  min-height: 297mm;
-  padding: 20mm;
-  margin: 0 auto;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  font-family: var(--font-sans);
-}
-
-

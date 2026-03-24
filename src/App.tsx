@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Printer } from 'lucide-react';
+import { Plus, Trash2, Printer, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface InvoiceItem {
@@ -40,6 +40,7 @@ interface InvoiceData {
 }
 
 export default function App() {
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [data, setData] = useState<InvoiceData>({
     logoUrl: '',
     logoType: 'square',
@@ -67,6 +68,22 @@ export default function App() {
     upiId: '',
     note: 'Thank you for choosing us!',
   });
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/guru-invoive/sw.js');
+    }
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,6 +153,7 @@ export default function App() {
       <div className="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-gray-200 no-print max-w-full lg:max-w-2xl overflow-y-auto max-h-[90vh]">
         <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
           <h2 className="text-3xl font-bold tracking-tight text-black">Invoice Editor</h2>
+          <div className="flex gap-2 items-center">
           <button
             onClick={handlePrint}
             className="flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
@@ -143,6 +161,16 @@ export default function App() {
             <Printer size={20} />
             Print Invoice
           </button>
+          {installPrompt && (
+            <button
+              onClick={handleInstall}
+              className="flex items-center gap-2 bg-gray-100 text-black px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all active:scale-95"
+            >
+              <Download size={18} />
+              Install App
+            </button>
+          )}
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -439,7 +467,7 @@ export default function App() {
         <div className="invoice-container shadow-2xl">
           {/* Top Section */}
           {data.logoType === 'banner' ? (
-            <div className="mb-8">
+            <div className="mb-4">
               <div className="w-full h-32 flex items-center justify-center overflow-hidden mb-4">
                 {data.logoUrl ? (
                   <img src={data.logoUrl} alt="Company Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
@@ -454,7 +482,7 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-between items-start mb-12">
+            <div className="flex justify-between items-start mb-8">
               <div className="w-32 h-32 flex items-center justify-start overflow-hidden">
                 {data.logoUrl ? (
                   <img src={data.logoUrl} alt="Company Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
@@ -471,8 +499,8 @@ export default function App() {
           )}
 
           {/* Title Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold tracking-[0.2em] text-black mb-4">INVOICE</h1>
+          <div className="text-center mb-6">
+            <h1 className="text-5xl font-bold tracking-[0.2em] text-black mb-2">INVOICE</h1>
             <div className="flex flex-col items-center gap-1 text-sm text-gray-500 uppercase tracking-widest">
               <div><span className="font-bold text-gray-900">Date:</span> {formatDate(data.date)}</div>
               {data.gstin && (
@@ -482,7 +510,7 @@ export default function App() {
           </div>
 
           {/* Billed To / From Section */}
-          <div className="grid grid-cols-2 gap-8 mb-12">
+          <div className="grid grid-cols-2 gap-8 mb-6">
             <div>
               <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Billed to</h3>
               <div className="text-lg font-bold text-gray-900 mb-1">{data.billedTo.name}</div>
@@ -498,7 +526,7 @@ export default function App() {
           </div>
 
           {/* Table Section */}
-          <table className="w-full mb-8 border-collapse">
+          <table className="w-full mb-4 border-collapse">
             <thead>
               <tr className="bg-[#333333] text-white">
                 <th className="text-left py-3 px-6 text-[11px] font-medium uppercase tracking-wider rounded-l-lg">Item</th>
@@ -526,7 +554,7 @@ export default function App() {
           </table>
 
           {/* Total Section */}
-          <div className="border-t-2 border-black pt-4 mb-12">
+          <div className="border-t-2 border-black pt-3 mb-6">
             <div className="flex flex-col items-end space-y-2">
               <div className="w-[40%] flex justify-between items-center text-sm text-gray-600">
                 <span>Subtotal</span>
