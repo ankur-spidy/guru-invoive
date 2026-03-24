@@ -148,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col lg:flex-row gap-8 font-sans text-gray-900">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col lg:flex-row gap-8 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0">
       {/* Input Form */}
       <div className="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-gray-200 no-print max-w-full lg:max-w-2xl overflow-y-auto max-h-[90vh]">
         <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
@@ -463,7 +463,7 @@ export default function App() {
       </div>
 
       {/* Invoice Preview */}
-      <div className="flex-1 flex justify-center items-start overflow-x-auto">
+      <div className="print-wrapper flex-1 flex justify-center items-start overflow-x-auto">
         <div className="invoice-container shadow-2xl">
           {/* Top Section */}
           {data.logoType === 'banner' ? (
