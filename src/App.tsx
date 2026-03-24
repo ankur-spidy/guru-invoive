@@ -71,7 +71,7 @@ export default function App() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/guru-invoive/sw.js');
+      navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js');
     }
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);

@@ -2,8 +2,8 @@
   "name": "Invoice Guru",
   "short_name": "InvoiceGuru",
   "description": "Professional Invoice Generator",
-  "start_url": "/guru-invoive/",
-  "scope": "/guru-invoive/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -11,12 +11,19 @@
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }
