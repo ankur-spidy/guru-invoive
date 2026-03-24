@@ -148,81 +148,77 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0 flex flex-col lg:flex-row lg:h-screen">
       {/* Editor Panel */}
-      <div className="no-print w-full bg-white border-b border-gray-200 shadow-sm">
+      <div className="no-print w-full lg:w-[420px] xl:w-[480px] bg-white border-b lg:border-b-0 lg:border-r border-gray-200 shadow-sm flex flex-col lg:h-screen">
         {/* Header */}
-        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-          <h2 className="text-xl font-bold tracking-tight text-black">Invoice Editor</h2>
+        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
+          <h2 className="text-lg font-bold tracking-tight text-black">Invoice Editor</h2>
           <div className="flex gap-2 items-center">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-black text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all active:scale-95"
             >
-              <Printer size={16} />
-              <span className="hidden sm:inline">Print Invoice</span>
-              <span className="sm:hidden">Print</span>
+              <Printer size={15} />
+              <span>Print</span>
             </button>
             {installPrompt && (
               <button
                 onClick={handleInstall}
-                className="flex items-center gap-1.5 bg-gray-100 text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-all active:scale-95"
               >
-                <Download size={16} />
-                <span className="hidden sm:inline">Install App</span>
-                <span className="sm:hidden">Install</span>
+                <Download size={15} />
+                <span>Install</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Form Fields */}
-        <div className="p-4 space-y-4 max-w-5xl mx-auto">
-          {/* Row 1: Logo + Invoice details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Logo Image</label>
-                <div className="flex items-center gap-3">
-                  <div className={`border-2 border-dashed rounded flex items-center justify-center bg-gray-50 overflow-hidden shrink-0 ${data.logoType === 'square' ? 'w-14 h-14' : 'w-32 h-14'}`}>
-                    {data.logoUrl ? (
-                      <img src={data.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
-                    ) : (
-                      <span className="text-[10px] text-gray-400 text-center px-1">{data.logoType === 'square' ? '1:1' : 'Banner'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
-                    <label htmlFor="logo-upload" className="cursor-pointer inline-block bg-gray-100 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-200">Choose File</label>
-                    {data.logoUrl && <button onClick={() => setData({ ...data, logoUrl: '' })} className="text-xs text-red-500 hover:underline text-left">Remove</button>}
-                  </div>
+        {/* Scrollable Form */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Logo + Invoice details */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-600">Logo Image</label>
+              <div className="flex items-center gap-2">
+                <div className={`border-2 border-dashed rounded flex items-center justify-center bg-gray-50 overflow-hidden shrink-0 ${data.logoType === 'square' ? 'w-12 h-12' : 'w-24 h-12'}`}>
+                  {data.logoUrl ? (
+                    <img src={data.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
+                  ) : (
+                    <span className="text-[9px] text-gray-400 text-center px-1">{data.logoType === 'square' ? '1:1' : 'Banner'}</span>
+                  )}
                 </div>
-                <div className="flex gap-4 mt-2">
-                  {(['square', 'banner'] as const).map(t => (
-                    <label key={t} className="flex items-center gap-1.5 cursor-pointer">
-                      <input type="radio" name="logoType" value={t} checked={data.logoType === t} onChange={() => setData({ ...data, logoType: t })} className="w-3.5 h-3.5 accent-black" />
-                      <span className="text-xs font-medium">{t === 'square' ? 'Square' : 'Banner'}</span>
-                    </label>
-                  ))}
+                <div className="flex flex-col gap-1">
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
+                  <label htmlFor="logo-upload" className="cursor-pointer inline-block bg-gray-100 px-2 py-1 rounded text-xs font-medium hover:bg-gray-200">Choose</label>
+                  {data.logoUrl && <button onClick={() => setData({ ...data, logoUrl: '' })} className="text-xs text-red-500 hover:underline text-left">Remove</button>}
                 </div>
+              </div>
+              <div className="flex gap-3">
+                {(['square', 'banner'] as const).map(t => (
+                  <label key={t} className="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" name="logoType" value={t} checked={data.logoType === t} onChange={() => setData({ ...data, logoType: t })} className="w-3 h-3 accent-black" />
+                    <span className="text-xs">{t === 'square' ? 'Square' : 'Banner'}</span>
+                  </label>
+                ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Invoice No.</label>
-                <input type="text" value={data.invoiceNumber} onChange={(e) => setData({ ...data, invoiceNumber: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
+                <input type="text" value={data.invoiceNumber} onChange={(e) => setData({ ...data, invoiceNumber: e.target.value })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">GSTIN</label>
-                <input type="text" placeholder="Optional" value={data.gstin} onChange={(e) => setData({ ...data, gstin: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
+                <input type="text" placeholder="Optional" value={data.gstin} onChange={(e) => setData({ ...data, gstin: e.target.value })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
-                <input type="date" value={data.date} onChange={(e) => setData({ ...data, date: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
+                <input type="date" value={data.date} onChange={(e) => setData({ ...data, date: e.target.value })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
-                <select value={data.currency} onChange={(e) => setData({ ...data, currency: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none">
+                <select value={data.currency} onChange={(e) => setData({ ...data, currency: e.target.value })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none">
                   <option value="₹">INR (₹)</option>
                   <option value="$">USD ($)</option>
                   <option value="€">EUR (€)</option>
@@ -234,43 +230,39 @@ export default function App() {
 
           <hr className="border-gray-100" />
 
-          {/* Row 2: Billed To & From */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { label: 'Billed to', key: 'billedTo' as const },
-              { label: 'From', key: 'from' as const },
-            ].map(({ label, key }) => (
-              <div key={key} className="space-y-2">
+          {/* Billed To & From */}
+          <div className="grid grid-cols-2 gap-3">
+            {([['billedTo', 'Billed to'], ['from', 'From']] as const).map(([key, label]) => (
+              <div key={key} className="space-y-1.5">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</h3>
-                <input placeholder="Name" value={data[key].name} onChange={(e) => setData({ ...data, [key]: { ...data[key], name: e.target.value } })} className="w-full p-2 border rounded text-sm" />
-                <textarea placeholder="Address" value={data[key].address} onChange={(e) => setData({ ...data, [key]: { ...data[key], address: e.target.value } })} className="w-full p-2 border rounded text-sm" rows={2} />
-                <input placeholder="Email" value={data[key].email} onChange={(e) => setData({ ...data, [key]: { ...data[key], email: e.target.value } })} className="w-full p-2 border rounded text-sm" />
+                <input placeholder="Name" value={data[key].name} onChange={(e) => setData({ ...data, [key]: { ...data[key], name: e.target.value } })} className="w-full p-1.5 border rounded text-xs" />
+                <textarea placeholder="Address" value={data[key].address} onChange={(e) => setData({ ...data, [key]: { ...data[key], address: e.target.value } })} className="w-full p-1.5 border rounded text-xs" rows={2} />
+                <input placeholder="Email" value={data[key].email} onChange={(e) => setData({ ...data, [key]: { ...data[key], email: e.target.value } })} className="w-full p-1.5 border rounded text-xs" />
               </div>
             ))}
           </div>
 
           <hr className="border-gray-100" />
 
-          {/* Row 3: Items */}
+          {/* Items */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Items</h3>
-              <button onClick={addItem} className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1.5 rounded hover:bg-gray-200 font-medium">
-                <Plus size={12} /> Add Item
+              <button onClick={addItem} className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 font-medium">
+                <Plus size={11} /> Add Item
               </button>
             </div>
-            <div className="space-y-2">
-              {/* Header row */}
-              <div className="hidden sm:grid grid-cols-[1fr_60px_80px_80px_36px] gap-2 text-xs text-gray-400 font-medium px-1">
-                <span>Item</span><span className="text-center">Qty</span><span className="text-center">Price</span><span className="text-center">Amount</span><span></span>
-              </div>
+            <div className="grid grid-cols-[1fr_44px_68px_68px_28px] gap-1 text-[10px] text-gray-400 font-medium mb-1 px-0.5">
+              <span>Item</span><span className="text-center">Qty</span><span className="text-center">Price</span><span className="text-center">Amt</span><span></span>
+            </div>
+            <div className="space-y-1.5">
               {data.items.map((item) => (
-                <div key={item.id} className="grid grid-cols-[1fr_60px_80px_80px_36px] gap-2 items-center">
-                  <input placeholder="Item name" value={item.name} onChange={(e) => updateItem(item.id, 'name', e.target.value)} className="p-2 border rounded text-sm w-full" />
-                  <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)} className="p-2 border rounded text-sm w-full text-center" />
-                  <input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="p-2 border rounded text-sm w-full text-right" />
-                  <div className="p-2 border rounded text-sm bg-gray-50 text-right">{item.amount}</div>
-                  <button onClick={() => removeItem(item.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded flex items-center justify-center"><Trash2 size={15} /></button>
+                <div key={item.id} className="grid grid-cols-[1fr_44px_68px_68px_28px] gap-1 items-center">
+                  <input placeholder="Name" value={item.name} onChange={(e) => updateItem(item.id, 'name', e.target.value)} className="p-1.5 border rounded text-xs w-full" />
+                  <input type="number" value={item.quantity} onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)} className="p-1.5 border rounded text-xs w-full text-center" />
+                  <input type="number" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="p-1.5 border rounded text-xs w-full text-right" />
+                  <div className="p-1.5 border rounded text-xs bg-gray-50 text-right">{item.amount}</div>
+                  <button onClick={() => removeItem(item.id)} className="p-1 text-red-400 hover:bg-red-50 rounded flex items-center justify-center"><Trash2 size={13} /></button>
                 </div>
               ))}
             </div>
@@ -278,43 +270,43 @@ export default function App() {
 
           <hr className="border-gray-100" />
 
-          {/* Row 4: Discount, Payment, Note */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="space-y-3">
+          {/* Discount, Payment, Note */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Discount ({data.currency})</label>
-                <input type="number" value={data.discount} onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
+                <input type="number" value={data.discount} onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Payment Method</label>
-                <div className="flex gap-4">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Payment</label>
+                <div className="flex gap-3">
                   {(['Cash', 'UPI'] as const).map(m => (
-                    <label key={m} className="flex items-center gap-1.5 cursor-pointer">
-                      <input type="radio" name="paymentMethod" value={m} checked={data.paymentMethod === m} onChange={() => setData({ ...data, paymentMethod: m })} className="w-3.5 h-3.5 accent-black" />
-                      <span className="text-sm font-medium">{m}</span>
+                    <label key={m} className="flex items-center gap-1 cursor-pointer">
+                      <input type="radio" name="paymentMethod" value={m} checked={data.paymentMethod === m} onChange={() => setData({ ...data, paymentMethod: m })} className="w-3 h-3 accent-black" />
+                      <span className="text-xs font-medium">{m}</span>
                     </label>
                   ))}
                 </div>
               </div>
               {data.paymentMethod === 'UPI' && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
                   <label className="block text-xs font-medium text-gray-600 mb-1">UPI ID</label>
-                  <input type="text" placeholder="yourname@upi" value={data.upiId} onChange={(e) => setData({ ...data, upiId: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
+                  <input type="text" placeholder="yourname@upi" value={data.upiId} onChange={(e) => setData({ ...data, upiId: e.target.value })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
                 </motion.div>
               )}
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Note</label>
-              <textarea value={data.note} onChange={(e) => setData({ ...data, note: e.target.value })} className="w-full p-2 border rounded text-sm h-24 resize-none" />
+              <textarea value={data.note} onChange={(e) => setData({ ...data, note: e.target.value })} className="w-full p-1.5 border rounded text-xs h-20 resize-none" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Invoice Preview */}
-      <div className="print-wrapper bg-gray-100 py-6 px-4 flex justify-center items-start overflow-x-auto">
+      <div className="print-wrapper flex-1 bg-gray-100 flex justify-center items-start overflow-auto py-6 px-4">
         <div className="invoice-scale-wrapper">
-        <div className="invoice-container shadow-2xl" style={{ transformOrigin: 'top center' }}>
+        <div className="invoice-container shadow-2xl">
           {/* Top Section */}
           {data.logoType === 'banner' ? (
             <div className="mb-4">
