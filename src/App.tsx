@@ -148,323 +148,173 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col lg:flex-row gap-8 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0">
-      {/* Input Form */}
-      <div className="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-gray-200 no-print max-w-full lg:max-w-2xl overflow-y-auto max-h-[90vh]">
-        <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
-          <h2 className="text-3xl font-bold tracking-tight text-black">Invoice Editor</h2>
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0">
+      {/* Editor Panel */}
+      <div className="no-print w-full bg-white border-b border-gray-200 shadow-sm">
+        {/* Header */}
+        <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+          <h2 className="text-xl font-bold tracking-tight text-black">Invoice Editor</h2>
           <div className="flex gap-2 items-center">
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
-          >
-            <Printer size={20} />
-            Print Invoice
-          </button>
-          {installPrompt && (
             <button
-              onClick={handleInstall}
-              className="flex items-center gap-2 bg-gray-100 text-black px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all active:scale-95"
+              onClick={handlePrint}
+              className="flex items-center gap-1.5 bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all active:scale-95"
             >
-              <Download size={18} />
-              Install App
+              <Printer size={16} />
+              <span className="hidden sm:inline">Print Invoice</span>
+              <span className="sm:hidden">Print</span>
             </button>
-          )}
+            {installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="flex items-center gap-1.5 bg-gray-100 text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-all active:scale-95"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">Install App</span>
+                <span className="sm:hidden">Install</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Header Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
+        {/* Form Fields */}
+        <div className="p-4 space-y-4 max-w-5xl mx-auto">
+          {/* Row 1: Logo + Invoice details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Logo Image</label>
-                <div className="flex items-center gap-4">
-                  <div className={`border-2 border-dashed rounded flex items-center justify-center bg-gray-50 overflow-hidden ${data.logoType === 'square' ? 'w-20 h-20' : 'w-full h-20'}`}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Logo Image</label>
+                <div className="flex items-center gap-3">
+                  <div className={`border-2 border-dashed rounded flex items-center justify-center bg-gray-50 overflow-hidden shrink-0 ${data.logoType === 'square' ? 'w-14 h-14' : 'w-32 h-14'}`}>
                     {data.logoUrl ? (
-                      <img src={data.logoUrl} alt="Logo Preview" className="max-w-full max-h-full object-contain" />
+                      <img src={data.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
                     ) : (
-                      <span className="text-xs text-gray-400">{data.logoType === 'square' ? '1:1 Logo' : 'Banner Logo'}</span>
+                      <span className="text-[10px] text-gray-400 text-center px-1">{data.logoType === 'square' ? '1:1' : 'Banner'}</span>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="logo-upload"
-                    />
-                    <label
-                      htmlFor="logo-upload"
-                      className="cursor-pointer inline-block bg-gray-100 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-200"
-                    >
-                      Choose File
-                    </label>
-                    {data.logoUrl && (
-                      <button
-                        onClick={() => setData({ ...data, logoUrl: '' })}
-                        className="ml-2 text-xs text-red-500 hover:underline"
-                      >
-                        Remove
-                      </button>
-                    )}
+                  <div className="flex flex-col gap-1">
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
+                    <label htmlFor="logo-upload" className="cursor-pointer inline-block bg-gray-100 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-200">Choose File</label>
+                    {data.logoUrl && <button onClick={() => setData({ ...data, logoUrl: '' })} className="text-xs text-red-500 hover:underline text-left">Remove</button>}
                   </div>
                 </div>
+                <div className="flex gap-4 mt-2">
+                  {(['square', 'banner'] as const).map(t => (
+                    <label key={t} className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="logoType" value={t} checked={data.logoType === t} onChange={() => setData({ ...data, logoType: t })} className="w-3.5 h-3.5 accent-black" />
+                      <span className="text-xs font-medium">{t === 'square' ? 'Square' : 'Banner'}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Invoice No.</label>
+                <input type="text" value={data.invoiceNumber} onChange={(e) => setData({ ...data, invoiceNumber: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Logo Style</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="logoType"
-                      value="square"
-                      checked={data.logoType === 'square'}
-                      onChange={() => setData({ ...data, logoType: 'square' })}
-                      className="w-4 h-4 accent-black"
-                    />
-                    <span className="text-sm font-medium group-hover:text-black transition-colors">Square (1:1)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="logoType"
-                      value="banner"
-                      checked={data.logoType === 'banner'}
-                      onChange={() => setData({ ...data, logoType: 'banner' })}
-                      className="w-4 h-4 accent-black"
-                    />
-                    <span className="text-sm font-medium group-hover:text-black transition-colors">Banner (Full Width)</span>
-                  </label>
-                </div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">GSTIN</label>
+                <input type="text" placeholder="Optional" value={data.gstin} onChange={(e) => setData({ ...data, gstin: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
               </div>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Invoice No.</label>
-                  <input
-                    type="text"
-                    value={data.invoiceNumber}
-                    onChange={(e) => setData({ ...data, invoiceNumber: e.target.value })}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 22AAAAA0000A1Z5"
-                    value={data.gstin}
-                    onChange={(e) => setData({ ...data, gstin: e.target.value })}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                <input type="date" value={data.date} onChange={(e) => setData({ ...data, date: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={data.date}
-                    onChange={(e) => setData({ ...data, date: e.target.value })}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                  <select
-                    value={data.currency}
-                    onChange={(e) => setData({ ...data, currency: e.target.value })}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none"
-                  >
-                    <option value="₹">INR (₹)</option>
-                    <option value="$">USD ($)</option>
-                    <option value="€">EUR (€)</option>
-                    <option value="£">GBP (£)</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
+                <select value={data.currency} onChange={(e) => setData({ ...data, currency: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none">
+                  <option value="₹">INR (₹)</option>
+                  <option value="$">USD ($)</option>
+                  <option value="€">EUR (€)</option>
+                  <option value="£">GBP (£)</option>
+                </select>
               </div>
             </div>
           </div>
 
-          <hr />
+          <hr className="border-gray-100" />
 
-          {/* Billed To & From */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <h3 className="font-bold text-gray-700">Billed to:</h3>
-              <input
-                placeholder="Name"
-                value={data.billedTo.name}
-                onChange={(e) => setData({ ...data, billedTo: { ...data.billedTo, name: e.target.value } })}
-                className="w-full p-2 border rounded"
-              />
-              <textarea
-                placeholder="Address"
-                value={data.billedTo.address}
-                onChange={(e) => setData({ ...data, billedTo: { ...data.billedTo, address: e.target.value } })}
-                className="w-full p-2 border rounded"
-                rows={2}
-              />
-              <input
-                placeholder="Email"
-                value={data.billedTo.email}
-                onChange={(e) => setData({ ...data, billedTo: { ...data.billedTo, email: e.target.value } })}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="space-y-3">
-              <h3 className="font-bold text-gray-700">From:</h3>
-              <input
-                placeholder="Name"
-                value={data.from.name}
-                onChange={(e) => setData({ ...data, from: { ...data.from, name: e.target.value } })}
-                className="w-full p-2 border rounded"
-              />
-              <textarea
-                placeholder="Address"
-                value={data.from.address}
-                onChange={(e) => setData({ ...data, from: { ...data.from, address: e.target.value } })}
-                className="w-full p-2 border rounded"
-                rows={2}
-              />
-              <input
-                placeholder="Email"
-                value={data.from.email}
-                onChange={(e) => setData({ ...data, from: { ...data.from, email: e.target.value } })}
-                className="w-full p-2 border rounded"
-              />
-            </div>
+          {/* Row 2: Billed To & From */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { label: 'Billed to', key: 'billedTo' as const },
+              { label: 'From', key: 'from' as const },
+            ].map(({ label, key }) => (
+              <div key={key} className="space-y-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</h3>
+                <input placeholder="Name" value={data[key].name} onChange={(e) => setData({ ...data, [key]: { ...data[key], name: e.target.value } })} className="w-full p-2 border rounded text-sm" />
+                <textarea placeholder="Address" value={data[key].address} onChange={(e) => setData({ ...data, [key]: { ...data[key], address: e.target.value } })} className="w-full p-2 border rounded text-sm" rows={2} />
+                <input placeholder="Email" value={data[key].email} onChange={(e) => setData({ ...data, [key]: { ...data[key], email: e.target.value } })} className="w-full p-2 border rounded text-sm" />
+              </div>
+            ))}
           </div>
 
-          <hr />
+          <hr className="border-gray-100" />
 
-          {/* Items Table */}
+          {/* Row 3: Items */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <h3 className="font-bold text-gray-700">Items</h3>
-              <button
-                onClick={addItem}
-                className="flex items-center gap-1 text-sm bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
-              >
-                <Plus size={14} /> Add Item
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Items</h3>
+              <button onClick={addItem} className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1.5 rounded hover:bg-gray-200 font-medium">
+                <Plus size={12} /> Add Item
               </button>
             </div>
             <div className="space-y-2">
+              {/* Header row */}
+              <div className="hidden sm:grid grid-cols-[1fr_60px_80px_80px_36px] gap-2 text-xs text-gray-400 font-medium px-1">
+                <span>Item</span><span className="text-center">Qty</span><span className="text-center">Price</span><span className="text-center">Amount</span><span></span>
+              </div>
               {data.items.map((item) => (
-                <div key={item.id} className="flex flex-col sm:flex-row gap-2 items-start border-b sm:border-none pb-4 sm:pb-0">
-                  <input
-                    placeholder="Item Name"
-                    value={item.name}
-                    onChange={(e) => updateItem(item.id, 'name', e.target.value)}
-                    className="w-full sm:flex-[3] p-2 border rounded text-sm"
-                  />
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <input
-                      type="number"
-                      placeholder="Qty"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                      className="w-1/4 sm:w-16 p-2 border rounded text-sm"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      value={item.price}
-                      onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                      className="w-1/4 sm:w-24 p-2 border rounded text-sm"
-                    />
-                    <div className="w-1/4 sm:w-24 p-2 border rounded text-sm bg-gray-50 font-poppins text-right flex items-center justify-end">
-                      {item.amount}
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                <div key={item.id} className="grid grid-cols-[1fr_60px_80px_80px_36px] gap-2 items-center">
+                  <input placeholder="Item name" value={item.name} onChange={(e) => updateItem(item.id, 'name', e.target.value)} className="p-2 border rounded text-sm w-full" />
+                  <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)} className="p-2 border rounded text-sm w-full text-center" />
+                  <input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="p-2 border rounded text-sm w-full text-right" />
+                  <div className="p-2 border rounded text-sm bg-gray-50 text-right">{item.amount}</div>
+                  <button onClick={() => removeItem(item.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded flex items-center justify-center"><Trash2 size={15} /></button>
                 </div>
               ))}
             </div>
           </div>
 
-          <hr />
+          <hr className="border-gray-100" />
 
-          {/* Totals & Footer Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
+          {/* Row 4: Discount, Payment, Note */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Amount ({data.currency})</label>
-                <input
-                  type="number"
-                  value={data.discount}
-                  onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none"
-                />
+                <label className="block text-xs font-medium text-gray-600 mb-1">Discount ({data.currency})</label>
+                <input type="number" value={data.discount} onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Payment Method</label>
                 <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="Cash"
-                      checked={data.paymentMethod === 'Cash'}
-                      onChange={() => setData({ ...data, paymentMethod: 'Cash' })}
-                      className="w-4 h-4 accent-black"
-                    />
-                    <span className="text-sm font-medium group-hover:text-black transition-colors">Cash</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="UPI"
-                      checked={data.paymentMethod === 'UPI'}
-                      onChange={() => setData({ ...data, paymentMethod: 'UPI' })}
-                      className="w-4 h-4 accent-black"
-                    />
-                    <span className="text-sm font-medium group-hover:text-black transition-colors">UPI</span>
-                  </label>
+                  {(['Cash', 'UPI'] as const).map(m => (
+                    <label key={m} className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name="paymentMethod" value={m} checked={data.paymentMethod === m} onChange={() => setData({ ...data, paymentMethod: m })} className="w-3.5 h-3.5 accent-black" />
+                      <span className="text-sm font-medium">{m}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
               {data.paymentMethod === 'UPI' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="pt-2"
-                >
-                  <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. yourname@upi"
-                    value={data.upiId}
-                    onChange={(e) => setData({ ...data, upiId: e.target.value })}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-black outline-none text-sm"
-                  />
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">UPI ID</label>
+                  <input type="text" placeholder="yourname@upi" value={data.upiId} onChange={(e) => setData({ ...data, upiId: e.target.value })} className="w-full p-2 border rounded text-sm focus:ring-2 focus:ring-black outline-none" />
                 </motion.div>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
-              <textarea
-                value={data.note}
-                onChange={(e) => setData({ ...data, note: e.target.value })}
-                className="w-full p-2 border rounded"
-                rows={4}
-              />
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Note</label>
+              <textarea value={data.note} onChange={(e) => setData({ ...data, note: e.target.value })} className="w-full p-2 border rounded text-sm h-24 resize-none" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Invoice Preview */}
-      <div className="print-wrapper flex-1 flex justify-center items-start overflow-x-auto">
-        <div className="invoice-container shadow-2xl">
+      <div className="print-wrapper bg-gray-100 py-6 px-4 flex justify-center items-start overflow-x-auto">
+        <div className="invoice-scale-wrapper">
+        <div className="invoice-container shadow-2xl" style={{ transformOrigin: 'top center' }}>
           {/* Top Section */}
           {data.logoType === 'banner' ? (
             <div className="mb-4">
@@ -602,6 +452,7 @@ export default function App() {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

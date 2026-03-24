@@ -20,6 +20,26 @@
   box-sizing: border-box;
 }
 
+/* Scale invoice preview to fit small screens */
+.invoice-scale-wrapper {
+  width: 210mm;
+  transform-origin: top center;
+}
+
+@media (max-width: 900px) {
+  .invoice-scale-wrapper {
+    transform: scale(0.6);
+    margin-bottom: calc((297mm * 0.6) - 297mm);
+  }
+}
+
+@media (max-width: 500px) {
+  .invoice-scale-wrapper {
+    transform: scale(0.38);
+    margin-bottom: calc((297mm * 0.38) - 297mm);
+  }
+}
+
 @layer base {
   @media print {
     @page {
