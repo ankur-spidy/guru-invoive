@@ -324,8 +324,8 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-between items-start mb-8">
-              <div className="w-32 h-32 flex items-center justify-start overflow-hidden">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-20 h-20 flex items-center justify-start overflow-hidden">
                 {data.logoUrl ? (
                   <img src={data.logoUrl} alt="Company Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 ) : (
@@ -341,8 +341,8 @@ export default function App() {
           )}
 
           {/* Title Section */}
-          <div className="text-center mb-6">
-            <h1 className="text-5xl font-bold tracking-[0.2em] text-black mb-2">INVOICE</h1>
+          <div className="text-center mb-4">
+            <h1 className="text-4xl font-bold tracking-[0.2em] text-black mb-1">INVOICE</h1>
             <div className="flex flex-col items-center gap-1 text-sm text-gray-500 uppercase tracking-widest">
               <div><span className="font-bold text-gray-900">Date:</span> {formatDate(data.date)}</div>
               {data.gstin && (
@@ -352,18 +352,18 @@ export default function App() {
           </div>
 
           {/* Billed To / From Section */}
-          <div className="grid grid-cols-2 gap-8 mb-6">
+          <div className="grid grid-cols-2 gap-8 mb-4">
             <div>
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Billed to</h3>
-              <div className="text-lg font-bold text-gray-900 mb-1">{data.billedTo.name}</div>
-              <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-1">{data.billedTo.address}</div>
-              <div className="text-sm text-gray-500">{data.billedTo.email}</div>
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Billed to</h3>
+              <div className="text-base font-bold text-gray-900 mb-0.5">{data.billedTo.name}</div>
+              <div className="text-xs text-gray-600 leading-relaxed whitespace-pre-line mb-0.5">{data.billedTo.address}</div>
+              <div className="text-xs text-gray-500">{data.billedTo.email}</div>
             </div>
             <div className="text-right">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">From</h3>
-              <div className="text-lg font-bold text-gray-900 mb-1">{data.from.name}</div>
-              <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-1">{data.from.address}</div>
-              <div className="text-sm text-gray-500">{data.from.email}</div>
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">From</h3>
+              <div className="text-base font-bold text-gray-900 mb-0.5">{data.from.name}</div>
+              <div className="text-xs text-gray-600 leading-relaxed whitespace-pre-line mb-0.5">{data.from.address}</div>
+              <div className="text-xs text-gray-500">{data.from.email}</div>
             </div>
           </div>
 
@@ -371,22 +371,22 @@ export default function App() {
           <table className="w-full mb-4 border-collapse">
             <thead>
               <tr className="bg-[#333333] text-white">
-                <th className="text-left py-3 px-6 text-[11px] font-medium uppercase tracking-wider rounded-l-lg">Item</th>
-                <th className="text-right py-3 px-6 text-[11px] font-medium uppercase tracking-wider">Quantity</th>
-                <th className="text-right py-3 px-6 text-[11px] font-medium uppercase tracking-wider">Rate</th>
-                <th className="text-right py-3 px-6 text-[11px] font-medium uppercase tracking-wider rounded-r-lg">Amount</th>
+                <th className="text-left py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-l-lg">Item</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider">Quantity</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider">Rate</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-r-lg">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {data.items.map((item) => (
                 <tr key={item.id}>
-                  <td className="text-left py-4 px-6">{item.name}</td>
-                  <td className="text-right py-4 px-6 font-poppins">{item.quantity}</td>
-                  <td className="text-right py-4 px-6">
+                  <td className="text-left py-2 px-4 text-sm">{item.name}</td>
+                  <td className="text-right py-2 px-4 text-sm font-poppins">{item.quantity}</td>
+                  <td className="text-right py-2 px-4 text-sm">
                     <span className="mr-0.5">{data.currency}</span>
                     <span className="font-poppins">{item.price}</span>
                   </td>
-                  <td className="text-right py-4 px-6">
+                  <td className="text-right py-2 px-4 text-sm">
                     <span className="mr-0.5">{data.currency}</span>
                     <span className="font-poppins">{item.amount}</span>
                   </td>
@@ -396,27 +396,21 @@ export default function App() {
           </table>
 
           {/* Total Section */}
-          <div className="border-t-2 border-black pt-3 mb-6">
-            <div className="flex flex-col items-end space-y-2">
-              <div className="w-[40%] flex justify-between items-center text-sm text-gray-600">
+          <div className="border-t-2 border-black pt-2 mb-4">
+            <div className="flex flex-col items-end space-y-1">
+              <div className="w-[40%] flex justify-between items-center text-xs text-gray-600">
                 <span>Subtotal</span>
-                <span>
-                  <span className="mr-1">{data.currency}</span>
-                  <span className="font-poppins">{subtotal}</span>
-                </span>
+                <span><span className="mr-1">{data.currency}</span><span className="font-poppins">{subtotal}</span></span>
               </div>
               {data.discount > 0 && (
-                <div className="w-[40%] flex justify-between items-center text-sm text-red-600">
+                <div className="w-[40%] flex justify-between items-center text-xs text-red-600">
                   <span>Discount</span>
-                  <span>
-                    <span className="mr-1">- {data.currency}</span>
-                    <span className="font-poppins">{data.discount}</span>
-                  </span>
+                  <span><span className="mr-1">- {data.currency}</span><span className="font-poppins">{data.discount}</span></span>
                 </div>
               )}
-              <div className="w-[40%] flex justify-between items-center border-t border-gray-200 pt-4">
-                <span className="font-bold text-xl text-black uppercase tracking-wider">Total</span>
-                <span className="font-bold text-xl text-black">
+              <div className="w-[40%] flex justify-between items-center border-t border-gray-200 pt-2">
+                <span className="font-bold text-base text-black uppercase tracking-wider">Total</span>
+                <span className="font-bold text-base text-black">
                   <span className="mr-1">{data.currency}</span>
                   <span className="font-poppins">{total}</span>
                 </span>
@@ -425,21 +419,21 @@ export default function App() {
           </div>
 
           {/* Bottom Section */}
-          <div className="grid grid-cols-2 gap-8 border-t border-gray-100 pt-8">
+          <div className="grid grid-cols-2 gap-8 border-t border-gray-100 pt-4">
             <div>
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Payment Info</h3>
-              <div className="text-sm">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Payment Information</h3>
+              <div className="text-xs">
                 <span className="font-semibold text-gray-900">Method:</span> {data.paymentMethod}
               </div>
               {data.paymentMethod === 'UPI' && data.upiId && (
-                <div className="text-sm mt-1">
+                <div className="text-xs mt-0.5">
                   <span className="font-semibold text-gray-900">UPI ID:</span> <span className="font-poppins text-gray-600">{data.upiId}</span>
                 </div>
               )}
             </div>
             <div className="text-right">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3">Note</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Note</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
                 {data.note}
               </p>
             </div>
