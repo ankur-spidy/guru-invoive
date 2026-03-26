@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Printer, Download } from 'lucide-react';
 import { motion } from 'motion/react';
+import AgreementLetter from './AgreementLetter';
 
 interface InvoiceItem {
   id: string;
@@ -22,6 +23,7 @@ interface InvoiceData {
   gstin?: string;
   date: string;
   currency: string;
+  discountType: 'flat' | 'percent';
   discount: number;
   billedTo: {
     name: string;
@@ -40,6 +42,7 @@ interface InvoiceData {
 }
 
 export default function App() {
+  const [tab, setTab] = useState<'invoice' | 'agreement'>('invoice');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [data, setData] = useState<InvoiceData>({
     logoUrl: '',
@@ -48,6 +51,7 @@ export default function App() {
     gstin: '',
     date: new Date().toISOString().split('T')[0],
     currency: '₹',
+    discountType: 'flat',
     discount: 0,
     billedTo: {
       name: 'Michael Brown',
@@ -97,7 +101,12 @@ export default function App() {
   };
 
   const handlePrint = () => {
+    const name = data.billedTo.name.replace(/\s+/g, '_') || 'Invoice';
+    const date = data.date.replace(/-/g, '-');
+    const prev = document.title;
+    document.title = `${name}_${date}`;
     window.print();
+    document.title = prev;
   };
 
   const addItem = () => {
@@ -131,7 +140,10 @@ export default function App() {
   };
 
   const subtotal = Number(data.items.reduce((sum, item) => sum + item.amount, 0).toFixed(2));
-  const total = Number((subtotal - data.discount).toFixed(2));
+  const discountAmount = data.discountType === 'percent'
+    ? Number(((subtotal * data.discount) / 100).toFixed(2))
+    : Number(data.discount.toFixed(2));
+  const total = Number((subtotal - discountAmount).toFixed(2));
 
   // Format date for display
   const formatDate = (dateStr: string) => {
@@ -148,9 +160,29 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0 flex flex-col lg:flex-row lg:h-screen">
+    <>
+      {/* Tab Navigation */}
+      <div className="no-print fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 flex items-center px-3 gap-1 h-10 print:hidden">
+        <button
+          onClick={() => setTab('invoice')}
+          className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${tab === 'invoice' ? 'bg-black text-white' : 'text-gray-500 hover:text-black hover:bg-gray-100'}`}
+        >
+          Invoice
+        </button>
+        <button
+          onClick={() => setTab('agreement')}
+          className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${tab === 'agreement' ? 'bg-black text-white' : 'text-gray-500 hover:text-black hover:bg-gray-100'}`}
+        >
+          Agreement Letter
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="pt-10 print:pt-0">
+        {tab === 'agreement' ? <AgreementLetter /> : (
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0 flex flex-col lg:flex-row lg:h-screen lg:overflow-hidden">
       {/* Editor Panel */}
-      <div className="no-print w-full lg:w-[420px] xl:w-[480px] bg-white border-b lg:border-b-0 lg:border-r border-gray-200 shadow-sm flex flex-col lg:h-screen">
+      <div className="no-print w-full lg:w-[420px] xl:w-[480px] bg-white border-b lg:border-b-0 lg:border-r border-gray-200 shadow-sm flex flex-col lg:h-screen lg:overflow-hidden shrink-0">
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold tracking-tight text-black">Invoice Editor</h2>
@@ -274,8 +306,14 @@ export default function App() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Discount ({data.currency})</label>
-                <input type="number" value={data.discount} onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+                <label className="block text-xs font-medium text-gray-600 mb-1">Discount</label>
+                <div className="flex gap-1">
+                  <select value={data.discountType} onChange={(e) => setData({ ...data, discountType: e.target.value as 'flat' | 'percent' })} className="p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none bg-white">
+                    <option value="flat">{data.currency}</option>
+                    <option value="percent">%</option>
+                  </select>
+                  <input type="number" value={data.discount} onChange={(e) => setData({ ...data, discount: parseFloat(e.target.value) || 0 })} className="flex-1 p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Payment</label>
@@ -304,7 +342,7 @@ export default function App() {
       </div>
 
       {/* Invoice Preview */}
-      <div className="print-wrapper flex-1 bg-gray-100 flex justify-center items-start overflow-auto py-6 px-4">
+      <div className="print-wrapper flex-1 bg-gray-100 flex justify-center items-start overflow-auto py-4 px-2 sm:py-6 sm:px-4">
         <div className="invoice-scale-wrapper">
         <div className="invoice-container shadow-2xl">
           {/* Top Section */}
@@ -368,18 +406,20 @@ export default function App() {
           </div>
 
           {/* Table Section */}
-          <table className="w-full mb-4 border-collapse">
+          <table className="w-full mb-4 border-collapse rounded-lg overflow-hidden">
             <thead>
-              <tr className="bg-[#333333] text-white">
-                <th className="text-left py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-l-lg">Item</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider">Quantity</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider">Rate</th>
-                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-r-lg">Amount</th>
+              <tr className="text-white" style={{backgroundColor: '#333333', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact'}}>
+                <th className="text-left py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-l-lg" style={{backgroundColor: '#333333'}}>No.</th>
+                <th className="text-left py-2 px-4 text-[10px] font-medium uppercase tracking-wider" style={{backgroundColor: '#333333'}}>Item</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider" style={{backgroundColor: '#333333'}}>Quantity</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider" style={{backgroundColor: '#333333'}}>Rate</th>
+                <th className="text-right py-2 px-4 text-[10px] font-medium uppercase tracking-wider rounded-r-lg" style={{backgroundColor: '#333333'}}>Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data.items.map((item) => (
+              {data.items.map((item, index) => (
                 <tr key={item.id}>
+                  <td className="text-left py-2 px-4 text-sm text-gray-500">{index + 1}</td>
                   <td className="text-left py-2 px-4 text-sm">{item.name}</td>
                   <td className="text-right py-2 px-4 text-sm font-poppins">{item.quantity}</td>
                   <td className="text-right py-2 px-4 text-sm">
@@ -402,10 +442,10 @@ export default function App() {
                 <span>Subtotal</span>
                 <span><span className="mr-1">{data.currency}</span><span className="font-poppins">{subtotal}</span></span>
               </div>
-              {data.discount > 0 && (
+              {discountAmount > 0 && (
                 <div className="w-[40%] flex justify-between items-center text-xs text-red-600">
-                  <span>Discount</span>
-                  <span><span className="mr-1">- {data.currency}</span><span className="font-poppins">{data.discount}</span></span>
+                  <span>Discount{data.discountType === 'percent' ? ` (${data.discount}%)` : ''}</span>
+                  <span><span className="mr-1">- {data.currency}</span><span className="font-poppins">{discountAmount}</span></span>
                 </div>
               )}
               <div className="w-[40%] flex justify-between items-center border-t border-gray-200 pt-2">
@@ -442,5 +482,8 @@ export default function App() {
         </div>
       </div>
     </div>
+        )}
+      </div>
+    </>
   );
 }
