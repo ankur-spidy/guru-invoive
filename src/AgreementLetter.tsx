@@ -1,222 +1,262 @@
-import React, { useState } from 'react';
-import { Printer } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Printer, Save, Clock, X } from 'lucide-react';
+import { load, save, addHistory, getHistory, deleteHistory, HistoryEntry } from './storage';
 
 interface AgreementData {
-  date: string;
   clientName: string;
-  clientAddress: string;
-  clientEmail: string;
-  providerName: string;
-  providerAddress: string;
-  providerEmail: string;
-  projectTitle: string;
-  projectDescription: string;
-  amount: string;
-  currency: string;
-  startDate: string;
-  endDate: string;
-  paymentTerms: string;
-  note: string;
+  aadhaar: string;
+  pan: string;
+  email: string;
+  mobile: string;
+  date: string;
+  projectFee: string;
+  deliveryDays: string;
+  lateFee: string;
+  jurisdiction: string;
+  driveLink: string;
 }
 
 export default function AgreementLetter() {
-  const [data, setData] = useState<AgreementData>({
+  const defaultData: AgreementData = {
+    clientName: '', aadhaar: '', pan: '', email: '', mobile: '',
     date: new Date().toISOString().split('T')[0],
-    clientName: 'Michael Brown',
-    clientAddress: '9101 Oak Road, Metropolis',
-    clientEmail: 'michaelbrown@example.com',
-    providerName: 'Emily Johnson',
-    providerAddress: '2345 Pine Lane, Villagetown',
-    providerEmail: 'emilyjohnson@example.com',
-    projectTitle: 'Website Design & Development',
-    projectDescription: 'Design and develop a fully responsive website including homepage, about, services, and contact pages.',
-    amount: '25000',
-    currency: '₹',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: '',
-    paymentTerms: '50% advance, 50% on delivery',
-    note: 'Both parties agree to the terms outlined in this agreement.',
-  });
+    projectFee: '', deliveryDays: '', lateFee: '', jurisdiction: '', driveLink: '',
+  };
 
-  const u = (f: keyof AgreementData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    setData({ ...data, [f]: e.target.value });
+  const [data, setData] = useState<AgreementData>(() =>
+    load('agreement_current', load('agreement_default', defaultData))
+  );
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => getHistory());
+
+  useEffect(() => { save('agreement_current', data); }, [data]);
+
+  const refreshHistory = () => setHistory(getHistory());
+
+  const handleSaveDefault = () => {
+    save('agreement_default', data);
+    alert('Saved as default template!');
+  };
+
+  const u = (f: keyof AgreementData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => setData({ ...data, [f]: e.target.value });
+
+  const blank = (val: string, fallback = '______________________') =>
+    val || fallback;
+
+  const handlePrint = () => {
+    const name = data.clientName.replace(/\s+/g, '_') || 'Agreement';
+    const date = data.date || new Date().toISOString().split('T')[0];
+    const prev = document.title;
+    document.title = `${name}_${date}`;
+    addHistory({
+      type: 'agreement',
+      label: `${data.clientName || 'Agreement'} — ${data.date}`,
+      date: new Date().toISOString(),
+      data,
+    });
+    refreshHistory();
+    window.print();
+    document.title = prev;
+  };
 
   const fmt = (d: string) => {
-    if (!d) return '___________';
+    if (!d) return '______________________';
     try { return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }); }
     catch { return d; }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0 flex flex-col lg:flex-row lg:h-screen">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 print:block print:p-0 print:bg-white print:min-h-0 flex flex-col lg:flex-row lg:h-screen lg:overflow-hidden">
       {/* Editor */}
-      <div className="no-print w-full lg:w-[420px] xl:w-[480px] bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col lg:h-screen">
+      <div className="no-print w-full lg:w-[380px] xl:w-[420px] bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col lg:h-screen shrink-0">
         <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
-          <h2 className="text-lg font-bold text-black">Agreement Editor</h2>
-          <button onClick={() => window.print()} className="flex items-center gap-1.5 bg-black text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all">
-            <Printer size={15} /> Print
-          </button>
+          <h2 className="text-base font-bold text-black">Agreement Editor</h2>
+          <div className="flex gap-2 items-center">
+            <button onClick={handleSaveDefault} title="Save as Default" className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200 transition-all">
+              <Save size={14} />
+            </button>
+            <button onClick={() => setShowHistory(h => !h)} title="History" className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200 transition-all">
+              <Clock size={14} />
+            </button>
+            <button onClick={handlePrint} className="flex items-center gap-1.5 bg-black text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all">
+              <Printer size={15} /> Print
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
-              <input type="date" value={data.date} onChange={u('date')} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+        {/* History Panel */}
+        {showHistory && (
+          <div className="border-b border-gray-100 bg-gray-50 max-h-48 overflow-y-auto">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100">
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">History</span>
+              <button onClick={() => setShowHistory(false)}><X size={13} className="text-gray-400" /></button>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Currency</label>
-              <select value={data.currency} onChange={u('currency')} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none">
-                <option value="₹">INR (₹)</option>
-                <option value="$">USD ($)</option>
-                <option value="€">EUR (€)</option>
-                <option value="£">GBP (£)</option>
-              </select>
-            </div>
+            {history.filter(h => h.type === 'agreement').length === 0 ? (
+              <p className="text-xs text-gray-400 px-4 py-3">No history yet. Print an agreement to save it.</p>
+            ) : (
+              history.filter(h => h.type === 'agreement').map(entry => (
+                <div key={entry.id} className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 border-b border-gray-50">
+                  <button className="text-xs text-left text-gray-700 hover:text-black flex-1" onClick={() => { setData(entry.data as AgreementData); setShowHistory(false); }}>
+                    {entry.label}
+                  </button>
+                  <button onClick={() => { deleteHistory(entry.id); refreshHistory(); }} className="text-red-400 hover:text-red-600 ml-2"><X size={11} /></button>
+                </div>
+              ))
+            )}
           </div>
+        )}
 
-          <hr className="border-gray-100" />
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {[
+            { label: 'Client Name', key: 'clientName' as const, placeholder: 'Full name' },
+            { label: 'Aadhaar No.', key: 'aadhaar' as const, placeholder: 'XXXX XXXX XXXX' },
+            { label: 'PAN (Optional)', key: 'pan' as const, placeholder: 'ABCDE1234F' },
+            { label: 'Email', key: 'email' as const, placeholder: 'client@email.com' },
+            { label: 'Mobile No.', key: 'mobile' as const, placeholder: '+91 XXXXX XXXXX' },
+          ].map(({ label, key, placeholder }) => (
+            <div key={key}>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+              <input value={data[key]} onChange={u(key)} placeholder={placeholder} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+            </div>
+          ))}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Client</h3>
-              <input placeholder="Name" value={data.clientName} onChange={u('clientName')} className="w-full p-1.5 border rounded text-xs" />
-              <textarea placeholder="Address" value={data.clientAddress} onChange={u('clientAddress')} className="w-full p-1.5 border rounded text-xs" rows={2} />
-              <input placeholder="Email" value={data.clientEmail} onChange={u('clientEmail')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Provider</h3>
-              <input placeholder="Name" value={data.providerName} onChange={u('providerName')} className="w-full p-1.5 border rounded text-xs" />
-              <textarea placeholder="Address" value={data.providerAddress} onChange={u('providerAddress')} className="w-full p-1.5 border rounded text-xs" rows={2} />
-              <input placeholder="Email" value={data.providerEmail} onChange={u('providerEmail')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-          </div>
-
-          <hr className="border-gray-100" />
-
-          <div className="space-y-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Project Title</label>
-              <input value={data.projectTitle} onChange={u('projectTitle')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Project Description</label>
-              <textarea value={data.projectDescription} onChange={u('projectDescription')} className="w-full p-1.5 border rounded text-xs" rows={3} />
-            </div>
-          </div>
-
-          <hr className="border-gray-100" />
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Amount</label>
-              <input type="number" value={data.amount} onChange={u('amount')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Payment Terms</label>
-              <input value={data.paymentTerms} onChange={u('paymentTerms')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
-              <input type="date" value={data.startDate} onChange={u('startDate')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
-              <input type="date" value={data.endDate} onChange={u('endDate')} className="w-full p-1.5 border rounded text-xs" />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+            <input type="date" value={data.date} onChange={u('date')} className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
           </div>
 
           <hr className="border-gray-100" />
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Note / Additional Terms</label>
-            <textarea value={data.note} onChange={u('note')} className="w-full p-1.5 border rounded text-xs h-16 resize-none" />
+            <label className="block text-xs font-medium text-gray-600 mb-1">Total Project Fee (₹)</label>
+            <input type="number" value={data.projectFee} onChange={u('projectFee')} placeholder="e.g. 5000" className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Delivery Days</label>
+            <input type="number" value={data.deliveryDays} onChange={u('deliveryDays')} placeholder="e.g. 7" className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Late Fee per Day (₹)</label>
+            <input type="number" value={data.lateFee} onChange={u('lateFee')} placeholder="e.g. 100" className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Jurisdiction (City/State)</label>
+            <input value={data.jurisdiction} onChange={u('jurisdiction')} placeholder="e.g. Mumbai, Maharashtra" className="w-full p-1.5 border rounded text-xs focus:ring-1 focus:ring-black outline-none" />
           </div>
         </div>
       </div>
 
       {/* Preview */}
-      <div className="print-wrapper flex-1 bg-gray-100 flex justify-center items-start overflow-auto py-6 px-4">
+      <div className="print-wrapper flex-1 bg-gray-100 flex justify-center items-start overflow-auto py-4 px-2 sm:py-6 sm:px-4">
         <div className="invoice-scale-wrapper">
-          <div className="invoice-container shadow-2xl">
+          <div className="invoice-container shadow-2xl text-[11px] leading-relaxed">
+
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold tracking-[0.15em] text-black mb-1">SERVICE AGREEMENT</h1>
-              <p className="text-xs text-gray-500 uppercase tracking-widest">This agreement is entered into on {fmt(data.date)}</p>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold tracking-wide text-black mb-1">FREELANCE EDITING AGREEMENT</h1>
+              <div className="w-16 h-0.5 bg-black mx-auto"></div>
             </div>
 
-            {/* Parties */}
-            <div className="grid grid-cols-2 gap-8 mb-6">
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Client</h3>
-                <div className="text-sm font-bold text-gray-900">{data.clientName}</div>
-                <div className="text-xs text-gray-600 mt-0.5 whitespace-pre-line">{data.clientAddress}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{data.clientEmail}</div>
-              </div>
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Service Provider</h3>
-                <div className="text-sm font-bold text-gray-900">{data.providerName}</div>
-                <div className="text-xs text-gray-600 mt-0.5 whitespace-pre-line">{data.providerAddress}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{data.providerEmail}</div>
-              </div>
-            </div>
-
-            {/* Project */}
+            {/* Party Info */}
             <div className="mb-5">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">1. Scope of Work</h3>
-              <div className="text-sm font-semibold text-gray-900 mb-1">{data.projectTitle}</div>
-              <p className="text-xs text-gray-600 leading-relaxed">{data.projectDescription}</p>
-            </div>
-
-            {/* Timeline */}
-            <div className="mb-5">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">2. Timeline</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-xs"><span className="font-semibold text-gray-700">Start Date:</span> <span className="text-gray-600">{fmt(data.startDate)}</span></div>
-                <div className="text-xs"><span className="font-semibold text-gray-700">End Date:</span> <span className="text-gray-600">{fmt(data.endDate)}</span></div>
+              <div className="flex justify-between mb-1">
+                <span><strong>Editor:</strong> Guru Editing House</span>
+                <span><strong>Date:</strong> {fmt(data.date)}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-1 border border-gray-200 rounded p-3 bg-gray-50">
+                <div><strong>Client Name:</strong> {blank(data.clientName)}</div>
+                <div><strong>Aadhaar No.:</strong> {blank(data.aadhaar)}</div>
+                <div><strong>PAN (Optional):</strong> {blank(data.pan)}</div>
+                <div><strong>Email:</strong> {blank(data.email)}</div>
+                <div><strong>Mobile No.:</strong> {blank(data.mobile)}</div>
               </div>
             </div>
 
-            {/* Payment */}
-            <div className="mb-5">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">3. Payment</h3>
-              <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-                <div>
-                  <div className="text-xs text-gray-500">Total Amount</div>
-                  <div className="text-xl font-bold text-black">{data.currency}{Number(data.amount).toLocaleString()}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-gray-500">Payment Terms</div>
-                  <div className="text-xs font-semibold text-gray-800">{data.paymentTerms}</div>
-                </div>
-              </div>
-            </div>
+            <hr className="border-gray-300 mb-4" />
 
-            {/* Terms */}
-            <div className="mb-6">
-              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">4. Terms & Conditions</h3>
-              <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside leading-relaxed">
-                <li>The service provider will deliver work as described in the scope above.</li>
-                <li>Any changes to the scope must be agreed upon in writing by both parties.</li>
-                <li>Payment must be made as per the agreed payment terms.</li>
-                <li>Either party may terminate this agreement with 7 days written notice.</li>
-              </ul>
-              {data.note && <p className="text-xs text-gray-600 mt-2 leading-relaxed">{data.note}</p>}
-            </div>
+            {/* Sections */}
+            {[
+              {
+                num: '1', title: 'Services',
+                content: <p>The Editor will provide Video Editing, Graphic Design, and Post-Production services as agreed with the Client.</p>
+              },
+              {
+                num: '2', title: 'Payment Terms',
+                content: (
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>Total Project Fee: <strong>₹{data.projectFee ? Number(data.projectFee).toLocaleString('en-IN') : '__________'}</strong></li>
+                    <li>Advance payment is required before starting the project</li>
+                    <li>Full payment must be completed before final delivery</li>
+                  </ul>
+                )
+              },
+              {
+                num: '3', title: 'Revisions',
+                content: (
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>Limited revisions are included</li>
+                    <li>Additional revisions will be charged separately</li>
+                  </ul>
+                )
+              },
+              {
+                num: '4', title: 'Delivery Timeline',
+                content: (
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>Estimated delivery: <strong>{blank(data.deliveryDays, '______')}</strong> days</li>
+                    <li>Timeline may vary depending on project complexity and client feedback</li>
+                  </ul>
+                )
+              },
+              {
+                num: '5', title: 'Ownership & Rights',
+                content: (
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>Full rights will be transferred after complete payment</li>
+                    <li>The Editor retains the right to showcase the work in portfolio or social media</li>
+                  </ul>
+                )
+              },
+              {
+                num: '6', title: 'Cancellation Policy',
+                content: <p>Advance payment is non-refundable once work has started.</p>
+              },
+              {
+                num: '7', title: 'Non-Payment & Copyright Enforcement',
+                content: <p>If the Client fails to complete the full payment within 7 days of final delivery, the Editor reserves the right to claim copyright over the content and may take necessary actions, including reporting or issuing a copyright claim/strike on the Client's platform (e.g., YouTube, social media) until payment is cleared.</p>
+              },
+              {
+                num: '8', title: 'Late Payment Charges',
+                content: <p>A late fee of <strong>₹{blank(data.lateFee, '_____')}</strong> per day may be charged if payment is delayed beyond 7 days.</p>
+              },
+              {
+                num: '9', title: 'Jurisdiction',
+                content: <p>This Agreement shall be governed by the laws of India, and any disputes shall be subject to the jurisdiction of the courts of <strong>{blank(data.jurisdiction, '__________ (City/State)')}</strong>.</p>
+              },
+            ].map(({ num, title, content }) => (
+              <div key={num} className="mb-3">
+                <h3 className="font-bold text-[11px] uppercase tracking-wide mb-1 text-gray-800">{num}. {title}</h3>
+                <div className="text-gray-700 pl-2">{content}</div>
+              </div>
+            ))}
+
+            <hr className="border-gray-300 my-5" />
 
             {/* Signatures */}
-            <div className="border-t border-gray-200 pt-6 grid grid-cols-2 gap-12">
+            <div className="grid grid-cols-2 gap-12 mt-4">
               <div>
-                <div className="border-b border-gray-400 mb-1 h-8"></div>
-                <div className="text-xs font-semibold text-gray-700">{data.clientName}</div>
-                <div className="text-[10px] text-gray-400">Client — Date: ___________</div>
+                <div className="border-b border-gray-500 h-8 mb-1"></div>
+                <div className="text-xs font-semibold">{blank(data.clientName, 'Client Name')}</div>
+                <div className="text-[10px] text-gray-500">Client Signature</div>
               </div>
               <div>
-                <div className="border-b border-gray-400 mb-1 h-8"></div>
-                <div className="text-xs font-semibold text-gray-700">{data.providerName}</div>
-                <div className="text-[10px] text-gray-400">Service Provider — Date: ___________</div>
+                <div className="border-b border-gray-500 h-8 mb-1"></div>
+                <div className="text-xs font-semibold">Guru Editing House</div>
+                <div className="text-[10px] text-gray-500">Editor Signature</div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

@@ -4,9 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Printer, Download } from 'lucide-react';
+import { Plus, Trash2, Printer, Download, Save, Clock, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import AgreementLetter from './AgreementLetter';
+import { load, save, addHistory, getHistory, deleteHistory, HistoryEntry } from './storage';
 
 interface InvoiceItem {
   id: string;
@@ -44,34 +45,29 @@ interface InvoiceData {
 export default function App() {
   const [tab, setTab] = useState<'invoice' | 'agreement'>('invoice');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [data, setData] = useState<InvoiceData>({
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => getHistory());
+
+  const defaultInvoice = {
     logoUrl: '',
-    logoType: 'square',
+    logoType: 'square' as const,
     invoiceNumber: '000001',
     gstin: '',
     date: new Date().toISOString().split('T')[0],
     currency: '₹',
-    discountType: 'flat',
+    discountType: 'flat' as const,
     discount: 0,
-    billedTo: {
-      name: 'Michael Brown',
-      address: '9101 Oak Road, Metropolis',
-      email: 'michaelbrown@example.com',
-    },
-    from: {
-      name: 'Emily Johnson',
-      address: '2345 Pine Lane, Villagetown',
-      email: 'emilyjohnson@example.com',
-    },
-    items: [
-      { id: '1', name: 'Logo Design', quantity: 1, price: 900, amount: 900 },
-      { id: '2', name: 'Banner Design', quantity: 2, price: 45, amount: 90 },
-      { id: '3', name: 'Poster Design', quantity: 3, price: 55, amount: 165 },
-    ],
-    paymentMethod: 'Cash',
+    billedTo: { name: '', address: '', email: '' },
+    from: { name: 'Guru Editing House', address: '', email: '' },
+    items: [{ id: '1', name: '', quantity: 1, price: 0, amount: 0 }],
+    paymentMethod: 'Cash' as const,
     upiId: '',
     note: 'Thank you for choosing us!',
-  });
+  };
+
+  const [data, setData] = useState<InvoiceData>(() =>
+    load('invoice_current', load('invoice_default', defaultInvoice))
+  );
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -81,6 +77,16 @@ export default function App() {
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
+
+  // Auto-save invoice to localStorage
+  useEffect(() => { save('invoice_current', data); }, [data]);
+
+  const handleSaveDefault = () => {
+    save('invoice_default', data);
+    alert('Saved as default template!');
+  };
+
+  const refreshHistory = () => setHistory(getHistory());
 
   const handleInstall = async () => {
     if (!installPrompt) return;
@@ -105,6 +111,13 @@ export default function App() {
     const date = data.date.replace(/-/g, '-');
     const prev = document.title;
     document.title = `${name}_${date}`;
+    addHistory({
+      type: 'invoice',
+      label: `${data.billedTo.name || 'Invoice'} — ${data.date}`,
+      date: new Date().toISOString(),
+      data,
+    });
+    refreshHistory();
     window.print();
     document.title = prev;
   };
@@ -187,6 +200,12 @@ export default function App() {
         <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold tracking-tight text-black">Invoice Editor</h2>
           <div className="flex gap-2 items-center">
+            <button onClick={handleSaveDefault} title="Save as Default" className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200 transition-all">
+              <Save size={14} />
+            </button>
+            <button onClick={() => setShowHistory(h => !h)} title="History" className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200 transition-all">
+              <Clock size={14} />
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 bg-black text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-all active:scale-95"
@@ -205,6 +224,28 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* History Panel */}
+        {showHistory && (
+          <div className="border-b border-gray-100 bg-gray-50 max-h-48 overflow-y-auto">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-gray-100">
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">History</span>
+              <button onClick={() => setShowHistory(false)}><X size={13} className="text-gray-400" /></button>
+            </div>
+            {history.filter(h => h.type === 'invoice').length === 0 ? (
+              <p className="text-xs text-gray-400 px-4 py-3">No history yet. Print an invoice to save it.</p>
+            ) : (
+              history.filter(h => h.type === 'invoice').map(entry => (
+                <div key={entry.id} className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 border-b border-gray-50">
+                  <button className="text-xs text-left text-gray-700 hover:text-black flex-1" onClick={() => { setData(entry.data as InvoiceData); setShowHistory(false); }}>
+                    {entry.label}
+                  </button>
+                  <button onClick={() => { deleteHistory(entry.id); refreshHistory(); }} className="text-red-400 hover:text-red-600 ml-2"><X size={11} /></button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Scrollable Form */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
